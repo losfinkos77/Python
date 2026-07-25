@@ -15,4 +15,17 @@ auswahl = input("Bitte wähle einen Menüpunkt: ")
 
 print()
 
-print("Du hast gewählt:", auswahl)
+if auswahl == "1":
+    print("Notizen werden geöffnet...")
+
+elif auswahl == "2":
+    print("Passwortgenerator wird geöffnet...")
+
+elif auswahl == "3":
+    print("Rechner wird geöffnet...")
+
+elif auswahl == "0":
+    print("Programm wird beendet.")
+
+else:
+    print("Ungültige Eingabe!")
