@@ -4,20 +4,43 @@ from pathlib import Path
 NOTIZ_DATEI = Path("notizen.txt")
 
 
+def notizen_laden():
+    if not NOTIZ_DATEI.exists():
+        return []
+
+    zeilen = NOTIZ_DATEI.read_text(encoding="utf-8").splitlines()
+
+    notizen = []
+
+    for zeile in zeilen:
+        zeile = zeile.strip()
+
+        if zeile.startswith("- "):
+            zeile = zeile[2:]
+
+        if zeile:
+            notizen.append(zeile)
+
+    return notizen
+
+
+def notizen_speichern(notizen):
+    with NOTIZ_DATEI.open("w", encoding="utf-8") as datei:
+        for notiz in notizen:
+            datei.write(f"- {notiz}\n")
+
+
 def notizen_anzeigen():
     print("\n=== GESPEICHERTE NOTIZEN ===\n")
 
-    if not NOTIZ_DATEI.exists():
+    notizen = notizen_laden()
+
+    if not notizen:
         print("Noch keine Notizen vorhanden.")
         return
 
-    inhalt = NOTIZ_DATEI.read_text(encoding="utf-8").strip()
-
-    if not inhalt:
-        print("Noch keine Notizen vorhanden.")
-        return
-
-    print(inhalt)
+    for nummer, notiz in enumerate(notizen, start=1):
+        print(f"{nummer}. {notiz}")
 
 
 def notiz_hinzufuegen():
@@ -29,28 +52,59 @@ def notiz_hinzufuegen():
         print("\nKeine Notiz eingegeben.")
         return
 
-    with NOTIZ_DATEI.open("a", encoding="utf-8") as datei:
-        datei.write(f"- {text}\n")
+    notizen = notizen_laden()
+    notizen.append(text)
+    notizen_speichern(notizen)
 
     print("\nNotiz wurde gespeichert.")
 
 
-def notizen_loeschen():
-    print("\n=== NOTIZEN LÖSCHEN ===")
+def notiz_loeschen():
+    print("\n=== NOTIZ LÖSCHEN ===\n")
 
-    if not NOTIZ_DATEI.exists():
-        print("\nEs gibt keine Notizen.")
+    notizen = notizen_laden()
+
+    if not notizen:
+        print("Es gibt keine Notizen.")
         return
 
+    for nummer, notiz in enumerate(notizen, start=1):
+        print(f"{nummer}. {notiz}")
+
+    print()
+    eingabe = input(
+        "Nummer der zu löschenden Notiz eingeben "
+        "oder 0 zum Abbrechen: "
+    ).strip()
+
+    if eingabe == "0":
+        print("\nLöschen wurde abgebrochen.")
+        return
+
+    if not eingabe.isdigit():
+        print("\nBitte eine gültige Nummer eingeben.")
+        return
+
+    nummer = int(eingabe)
+
+    if nummer < 1 or nummer > len(notizen):
+        print("\nDiese Notiznummer existiert nicht.")
+        return
+
+    ausgewaehlte_notiz = notizen[nummer - 1]
+
     bestaetigung = input(
-        "\nWirklich alle Notizen löschen? (j/n): "
+        f'\nNotiz "{ausgewaehlte_notiz}" wirklich löschen? (j/n): '
     ).strip().lower()
 
-    if bestaetigung == "j":
-        NOTIZ_DATEI.write_text("", encoding="utf-8")
-        print("\nAlle Notizen wurden gelöscht.")
-    else:
+    if bestaetigung != "j":
         print("\nLöschen wurde abgebrochen.")
+        return
+
+    geloeschte_notiz = notizen.pop(nummer - 1)
+    notizen_speichern(notizen)
+
+    print(f'\nNotiz "{geloeschte_notiz}" wurde gelöscht.')
 
 
 def notizen():
@@ -62,7 +116,7 @@ def notizen():
         print()
         print("1. Notizen anzeigen")
         print("2. Neue Notiz hinzufügen")
-        print("3. Alle Notizen löschen")
+        print("3. Einzelne Notiz löschen")
         print("0. Zurück zum Hauptmenü")
         print()
 
@@ -77,7 +131,7 @@ def notizen():
             input("\nENTER drücken...")
 
         elif auswahl == "3":
-            notizen_loeschen()
+            notiz_loeschen()
             input("\nENTER drücken...")
 
         elif auswahl == "0":
@@ -130,4 +184,3 @@ while True:
     else:
         print("\nUngültige Eingabe.")
         input("ENTER drücken...")
-    
